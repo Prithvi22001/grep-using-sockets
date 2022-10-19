@@ -1,17 +1,8 @@
 #!/usr/bin/env python3
-#
-# COMP 332, Fall 2018
-# Wesleyan University
-#
-# Simple echo client that makes a connection to an echo server,
-# sends a string to the server, then terminates
-#
-# Usage:
-#   python3 echo_client.py <server_host> <server_port>
-#
 
 import socket
 import sys
+from pprint import pprint
 
 class Client():
 
@@ -33,20 +24,23 @@ class Client():
                 client_sock.close()
             sys.exit(1)
 
-        query=input("Enter query :")
+        query=input("Enter query : ")
         client_sock.sendall(query.encode())
 
         # Get response data from server and print it
         finish=True
+        answer=[]
         while finish:    
             data = client_sock.recv(1024).decode()
             if not data: 
                 break
-            print ("From Server:", data)
+            # print ("From Server:", data)
+            answer.extend(data.split())
             if data.find('END!!') !=-1:
                 finish=False
 
         client_sock.close()
+        pprint(answer[:-1])
 
 def main():
 
