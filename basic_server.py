@@ -1,16 +1,28 @@
 #!/usr/bin/env python3
+'''
+Basic Server will create a server socket and serve only one client at a time.
+Class Server -> __init__() Will initialize server socket parameters and logging parameters
+                start() Will start the server,listen to client query and serve client
+                
+main() -> Main method creates a server object and will exit the script if an error occurs or for a KeyboardInterrupt
 
-from datetime import datetime
+'''
 import socket
 import sys
-import threading
-from utilities import extract_words  #Module to extract words from queries
+from utilities import extract_words  #Method to extract words from queries
+from get_word_list import make_wordlist_file #Method to make wordlist.txt file if it is not present
 import time
 
+#The class template is borrowed from Homework 4 echoserver_better.py all modifications are done by me
 class Server():
 
     def __init__(self, server_host, server_port):
-
+        '''
+        server_host : Hostname for server
+        server_port : Port for server
+        
+        '''
+        #Initializing server parameters
         self.server_host = server_host
         self.server_port = server_port
         self.server_backlog = 1 #Only one client
@@ -24,68 +36,45 @@ class Server():
             server_sock.bind((self.server_host, self.server_port))
             server_sock.listen(self.server_backlog)
             print (f"Server running on : {self.server_host},{self.server_port}")
+
+        #Incase of error the script would terminate       
         except OSError as e:
             print ('Unable to open socket: ', e)
             if server_sock:
                 server_sock.close()
             sys.exit(1)
 
-        # Wait for client connection
-        # end_time=datetime.datetime.now()+datetime.timedelta(seconds=600)
-        # print(end_time)
-        while True :#and not(datetime.datetime.now()>end_time):
+        #Wait for client connection
+        while True :
 
-        # Client has connected
-        
+            # Client has connected
             client_conn, client_addr = server_sock.accept()
             print ('Client has connected with address: ', client_addr)
 
+            #Receive client query and set response to the client
             while True:
                 query= client_conn.recv(1024)
-                # print(query)
+            
                 if not query: break
                 response= extract_words(query.decode())
+                
+                #Wait for 5 seconds
                 time.sleep(5)
+                
+                #Send response to client and "END!!" to indicate end of response 
                 client_conn.sendall(response.encode())
                 client_conn.send("END!!".encode())
                 break
-                # print(response.split()[-1])
-            print("done sending")
+
+
+            #Close client connection since client can send only one query
             client_conn.close()
 
 
-        # if client_conn:
-        #     print(f"closing connecetion")
-        #     client_conn.close()
-        #     server_sock.close()
-        #     sys.exit(1)
-            # # Create thread to serve client
-            # thread = threading.Thread(
-            #         target = self.serve_content,
-            #         args = (client_conn, client_addr))
-            # thread.daemon = True
-            # thread.start()
-
-        # server_sock.close()
-
-    # def serve_content(self, client_conn, client_addr):
-
-    #     print ('Serving content to client with address', client_addr)
-
-    #     # Receive data from client
-    #     bin_data = client_conn.recv(1024)
-
-    #     # Echo back received data to client
-    #     client_conn.sendall(bin_data)
-
-    #     # Print data from client
-    #     print ('Server received', bin_data)
-
-        # Close connection to client
-
+        
 def main():
 
-    # Echo server socket parameters
+    #Server socket parameters
     server_host = 'localhost'
     server_port = 50008
 
@@ -94,14 +83,14 @@ def main():
         server_host = sys.argv[1]
         server_port = int(sys.argv[2])
 
-    # Create EchoServer object
+    # Create Server object
     server = Server(server_host, server_port)
 
 if __name__ == '__main__':
     try:
         main()
-    # except KeyboardInterrupt:
-    #     print("Shutting down")
+    except KeyboardInterrupt:
+        print("Shutting down")
     except Exception as e:
         print(f"Other exception {e}")
 

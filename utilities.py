@@ -7,12 +7,10 @@ def extract_words(queries):
 		answer={}
 		for query in queries: 	
 			answer[query]=run_cmd(query)
-		print(answer)	
 		return answer	
 	else:
 		output=run_cmd(queries)
 		return output
-
 
 def run_cmd(query):
 	if os.sys.platform.startswith('win'):
